@@ -1,0 +1,53 @@
+syntax="proto2";
+package doc_server_proto;
+
+//当前的proto文件是否是用于生成RPC相关代码
+option cc_generic_services = true;
+
+//2.定义RPC函数的参数和返回值
+message Request
+{
+  /*
+  required int32 a = 1;
+  required int32 b = 2;
+  */
+
+  //sid -> search_id, 一次请求的身份标识
+  //用途:
+  // a) 识别出一条日志对应哪个请求
+  // b) 在分布式的场景下,需要sid来贯穿整个请求中涉及到的所有的服务器
+  required uint64 sid = 1;
+  //时间戳, 记录请求发送的时间
+  required int64 timestamp = 2;
+  //搜索的查询词
+  required string query = 3;
+};
+
+//每个Item对应一条搜索结果
+message Item
+{
+  required string title = 1;
+  required string desc = 2;
+  required string show_url = 3;
+  required string jump_url = 4;
+};
+
+message Response
+{
+  /*
+  required int32 sum = 1; 
+  */
+  //sid 和请求中的sid 是对应的
+  required uint64 sid = 1;
+  //时间戳, 记录的是响应发送的时间
+  required int64 timestamp = 2;
+  //具体的响应结果
+  repeated Item item = 3; 
+};
+
+//1.定义RPC函数都有哪些
+service DocServerAPI
+{
+  /* rpc Add(Request) returns (Response); */
+  rpc Search(Request) returns (Response);
+};
